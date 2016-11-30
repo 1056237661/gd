@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>果动</title>
+	<meta charset="utf-8">
+	<link rel="shortcut icon" href="../images/favicon.jpg">	
+	<link rel="stylesheet" type="text/css" href="../css/publish.css">
+
+	<script src="../framework/jquery-1.11.2.min.js"></script>
+    <script src="../framework/jquery.timepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="../framework/jquery.timepicker.css" />
+    <link rel="stylesheet" type="text/css" href="../css/layer.css">
+    <script src="../framework/bootstrap-datepicker.js"></script>
+    <link rel="stylesheet" type="text/css" href="../framework/bootstrap-datepicker.css" />
+	<script src="../framework/jquery.datepair.js"></script>
+	<link rel="stylesheet" type="text/css" href="../css/imgareaselect-default.css" />
+	<script src="../framework/layer.min.js"></script>
+	<script type="text/javascript" src="../framework/jquery.imgareaselect.pack.js"></script>
+	<script type="text/javascript" src="../js/publish.js"></script>
+
+<script type="text/javascript">
+
+	var uploadImageParameters={};
+	var imgAreaSelect = null;
+
+	$(document).ready(function(){
+
+		  $("#next").click(function(){
+			  $("#imagePath").val( $("#serverPoster").attr("src"));
+			  $.ajax({
+	                cache: true,
+	                type: "POST",
+	                url:"../../user/activity/publish.do",
+	                data:$("#publishActivity").serialize(),
+	                async: false,
+	                dataType: "json",
+	                success: function(request) {
+	                	 console.log(request.publishStuActivityResult);
+	                	 
+	                	 if(request.publishStuActivityResult==true){
+	                		 alert("上传活动成功");
+	                	 }else{
+	                		 alert("活动保存失败");
+	                	 }
+	                },
+	                error: function(data) {
+	                    alert("Connection error");
+	                }
+	            });
+			 
+			  
+		
+		  });
+
+		$("#poster").change(function(){
+			var objUrl = getObjectURL(this.files[0]) ;
+			$("#userImage").attr("src", objUrl) ;
+	    
+			var img = $("#userImage"); //获取img元素
+		     $("<img/>") // 在内存中创建一个img标记
+		    .attr("src", $(img).attr("src"))
+
+		    .load(function(){
+		       uploadImageParameters.realWidth = this.width;
+		       uploadImageParameters.realHeight = this.height;
+		       // console.log( uploadImageParameters.realHeight);
+		        $('#realWidth').val(uploadImageParameters.realWidth);
+			});
+
+		   imgAreaSelect = $('#userImage').imgAreaSelect({ 
+		   	aspectRatio: '2:3',
+		   	handles: true,
+		    fadeSpeed: 200,
+		    instance:true,
+		    onSelectChange: preview
+	    	});
+		}) 
+	});
+
+	function uploadImage(){
+		var pageii = $.layer({
+		    type: 1,
+		    title:['裁剪图片', 'background:#4A8CF7;color:white'],
+		    area: ['auto', 'auto'],
+		    border: [0],
+		    shade: [0], //去掉遮罩
+		    shadeClose: true,
+		    shift: 'left', //从左动画弹出
+		    page: {
+		       dom:'#uploadImage'
+		    }
+		});
+	}
+
+	function preview(img, selection) {
+	    if (!selection.width || !selection.height)
+	        return;
+	    $('#x1').val(selection.x1);
+	    $('#y1').val(selection.y1);
+	    $('#width').val(selection.width);
+	    $('#height').val(selection.height);   
+	}
+
+
+	function getObjectURL(file) {
+		var url = null ; 
+		if (window.createObjectURL!=undefined) { // basic
+			url = window.createObjectURL(file) ;
+		} else if (window.URL!=undefined) { // mozilla(firefox)
+			url = window.URL.createObjectURL(file) ;
+		} else if (window.webkitURL!=undefined) { // webkit or chrome
+			url = window.webkitURL.createObjectURL(file) ;
+		}
+		return url ;
+	}
+
+	function callback(msg) {
+		layer.closeAll();
+        imgAreaSelect.setOptions({ hide: true });
+        imgAreaSelect.update();
+        $('#serverPoster').attr("src", msg.picSavedPath) ;
+	}
+</script>
+<style type="text/css">
+	#uploadImage{
+       width:520px;
+       height:420px;
+       padding:20px; 
+       border:1px solid #ccc; 
+       background-color:#eee;
+       display:none;
+	}
+	#uploadImage img{
+	    max-width:500px;
+	   /* width:expression(this.offsetWidth > 400 ? "400px" : "auto");*/
+	    display:inline !important;
+	}
+</style>
+	
+</head>
+<body>
+		<!-- 导航栏 -->
+		<div class="nav1-w"></div>
+		<!-- 中间内容 -->
+		<div id="content1" class="content-w content-w1">
+			<!-- left -->
+			<div class="content-left-w">
+				<!-- title -->
+				<div class="cont-headline-w"><h1>填写活动信息</h1></div>
+				<!-- <div class="cont-flow-w">
+					<span>1.填写活动信息</span>
+					<span>></span>  
+					<span>2.上传海报及宣传图片</span>
+					<span>></span>  
+					<span>3.提交活动</span>
+				</div> -->
+
+				<!-- 活动信息form表单 -->
+				<form method="POST" action="" id="publishActivity">
+
+					<div class="cont-classify-w style-w">
+						<label>活动分类:</label>
+						<div class="act-classify-w">
+							<select id="acti_type" class="" name="acti_type">
+								<option value="00">请选择</option>
+								<option value="10">电影</option>
+								<option value="11">讲座</option>
+								<option value="12">音乐</option>
+								<option value="13">派对</option>
+								<option value="14">旅游</option>
+								<option value="15">运动</option>
+								<option value="16">比赛</option>
+								<option value="17">竞技</option>
+								<option value="99">其他</option>	
+							</select>
+						</div>
+					</div>
+
+					<div class="cont-title-w style-w">
+						<label>标题:</label>
+						<input id="input-info" type="text" name="acti_titile" value="">
+					</div>
+
+					<div class="cont-time-w style-w">
+						<label>活动时间:</label>
+						<p id="basicExample" >
+						    <input onfocus="if (value =='日期'){value =''}" onblur="if (value ==''){value='日期'}" value="日期" type="text" class="date start"  />
+						    <input onfocus="if (value =='时间'){value =''}" onblur="if (value ==''){value='时间'}" value="时间" type="text" class="time start" /> &nbsp;&nbsp;到&nbsp;&nbsp;
+						    <input type="text" class="time end" />
+						    <input type="text" class="date end" />
+
+						   <!--  <input name="acti_titile" type="hidden" />
+						    <input name="acti_titile" type="hidden" /> -->
+						</p>
+						<script>
+						    // initialize input widgets first
+						    $('#basicExample .time').timepicker({
+						        'showDuration': true,
+						        'timeFormat': 'g:ia'
+						    });
+
+						    $('#basicExample .date').datepicker({
+						        'format': 'm/d/yyyy',
+						        'autoclose': true
+						    });
+
+						    // initialize datepair
+						    $('#basicExample').datepair();
+						</script>
+					</div>
+
+					<div class="cont-address-w style-w">
+						<label>活动地点:</label>
+						<input id="input-info"  type="text" name="acti_address" value="">
+					</div>
+
+					<div class="cont-poster-w style-w">
+						<label>活动简介:</label>
+						<input id="input-info"  type="text" name="acti_summary" value="">
+					</div>
+
+					<div class="cont-details-w style-w">
+						<label>活动详情:</label>
+						<textarea name="acti_content" ></textarea>
+					</div>
+					
+					
+					<div class="cont-details-w style-w">
+						
+					<label>上传海报:</label>
+					<input id="imagePath" value="" type="hidden" name="acti_poster">
+					<div class="pic2">
+							<img src="../images/1.jpg" width="175px" height="260px;" id="serverPoster">
+							</div>	
+					</div>
+				</form>
+				<button onclick="uploadImage()" style="margin-left:80px;">上传图片</button>
+				<div class="next"><button class="button1"  id="next" >上传活动 </button></div>
+				<div class="cancel"><button id="cancel" style="color='red'"> 取 消 </button></div>
+							
+			</div>
+			<!-- right -->
+			<div class="content-right-w">
+					<h2>请确保您的活动符合法律规定：</h2>
+					<p class="pl">按照相关法律规定，营业性演出活动需取得国家行政部门审批，请确保你的活动已经获得相关资质及许可。未获上述批准的活动将被依法删除，且由此造成的后果须由活动举办方自行承担。</p>
+					<br>
+					<h2>什么是合适的同城活动？</h2>
+					<ol class="pl">
+					    <li>有能最终确定的活动起止日期</li>
+					    <li>具备现实中能集体参与的活动地点</li>
+					    <li>是多人在现实中能碰面的活动</li>
+					</ol>
+					<p class="pl">如果是多人的线上活动，如”一起制作自己的大头像“吧，请去专门的”<a href="#">线上活动</a>“创建。</p>
+					<br>
+					<h2>如何才能让你的活动更吸引人？</h2>
+					<ol class="pl">
+					    <li>标题简单明了 </li>
+					    <li>活动内容和特点介绍详细</li>
+					    <li>活动海报吸引人眼球 </li>
+					</ol>
+					<p class="pl"> 更重要的是，邀请好友们都来参与！</p>
+			</div>
+
+				<div id="uploadImage">
+								<form action="../../file/uploadPic.do" method="POST" enctype="multipart/form-data" target="hidden_frame">
+									    <img src="" id="userImage">
+										<input type="file" name="poster" id="poster"/> 
+										<iframe name="hidden_frame" id="hidden_frame" style="display:none">
+										</iframe>
+										<input type="text" name="x" id="x1" style="display:none" /> 
+										<input type="text" name="y" id="y1" style="display:none"/> 
+										<input type="text" name="width" id="width" style="display:none"/> 
+										<input type="text" name="height" id="height" style="display:none"/> 
+										<input type="text" name="realWidth" id="realWidth" style="display:none"/> 
+										<input type="submit"  value="裁剪"/>
+									</form>
+				</div>
+				<!-- right -->
+					<div class="content-right-w">
+							<h2>让你的活动更吸引人！</h2>
+							<p class="pl">用一张适合的图片代表你的活动，即使你没有专业的设计师。</p>
+							<p class="pl">随意拖拽或调整大图中的虚线区域，预览小图即为裁切后的效果。</p>
+							<p class="pl">高宽比为3:2的图片会得到最完整的显示。</p>
+							<br>
+							<h2>更重要的是，邀请好友们都来参与！</h2>
+					</div>
+
+		
+
+			<!-- 最下部信息 -->
+			<div class="bottom">
+				<div class="hidden-sm">
+					<span  id="icp" class="fleft gray-link">
+					    © 2005 all rights reserved
+					</span>
+
+					<a href="#" style="display: none;"></a>
+
+					<span class="fright">
+					    <a href="#">关于我们</a>
+					    · <a href="#">联系我们</a>
+					    · <a href="#">免责声明</a>
+					    
+					    · <a href="#">帮助中心</a>
+					    · <a href="#" target="_blank">开发者</a>
+					    · <a href="#">广告</a>
+					</span>
+	    		</div>
+			</div>
+		</div>
+</body>
+</html>
